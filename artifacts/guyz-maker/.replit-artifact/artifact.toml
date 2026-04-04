@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "Guyz Maker Portfolio"
+version = "1.0.0"
+id = "artifacts/guyz-maker"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 19940
+
+[services.development]
+run = "pnpm --filter @workspace/guyz-maker run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/guyz-maker", "run", "build" ]
+publicDir = "artifacts/guyz-maker/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "19940"
+BASE_PATH = "/"
