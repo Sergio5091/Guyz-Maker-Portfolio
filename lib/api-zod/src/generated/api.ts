@@ -261,3 +261,56 @@ export const UpdateProjectResponse = zod.object({
 export const DeleteProjectParams = zod.object({
   id: zod.coerce.number(),
 });
+
+/**
+ * @summary Track a page view
+ */
+export const TrackPageViewBody = zod.object({
+  path: zod.string(),
+  title: zod.string().nullish(),
+  referrer: zod.string().nullish(),
+});
+
+/**
+ * @summary Get overall analytics stats
+ */
+export const GetAnalyticsStatsQueryParams = zod.object({
+  days: zod.coerce.number().optional(),
+});
+
+export const GetAnalyticsStatsResponse = zod.object({
+  totalViews: zod.number(),
+  uniquePages: zod.number(),
+  todayViews: zod.number(),
+  weekViews: zod.number(),
+  topPage: zod.string().nullable(),
+});
+
+/**
+ * @summary Get page views by path
+ */
+export const ListPageViewsQueryParams = zod.object({
+  days: zod.coerce.number().optional(),
+  limit: zod.coerce.number().optional(),
+});
+
+export const ListPageViewsResponseItem = zod.object({
+  path: zod.string(),
+  title: zod.string().nullable(),
+  views: zod.number(),
+  lastVisit: zod.coerce.date(),
+});
+export const ListPageViewsResponse = zod.array(ListPageViewsResponseItem);
+
+/**
+ * @summary Get daily visit counts for chart
+ */
+export const GetDailyViewsQueryParams = zod.object({
+  days: zod.coerce.number().optional(),
+});
+
+export const GetDailyViewsResponseItem = zod.object({
+  date: zod.string(),
+  views: zod.number(),
+});
+export const GetDailyViewsResponse = zod.array(GetDailyViewsResponseItem);

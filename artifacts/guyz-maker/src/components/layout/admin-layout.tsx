@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, FileText, Briefcase, LogOut, Menu } from "lucide-react";
+import { LayoutDashboard, FileText, Briefcase, LogOut, Menu, BarChart2 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -16,6 +16,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
     { label: "Articles", href: "/admin/articles", icon: FileText },
     { label: "Projects", href: "/admin/projects", icon: Briefcase },
+    { label: "Statistiques", href: "/admin/analytics", icon: BarChart2 },
   ];
 
   const NavLinks = () => (

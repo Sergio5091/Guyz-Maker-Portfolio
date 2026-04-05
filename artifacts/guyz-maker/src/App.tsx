@@ -20,6 +20,10 @@ import AdminArticles from "@/pages/admin/articles";
 import ArticleForm from "@/pages/admin/articles/form";
 import AdminProjects from "@/pages/admin/projects";
 import ProjectForm from "@/pages/admin/projects/form";
+import AdminAnalytics from "@/pages/admin/analytics";
+
+// Hooks
+import { usePageTracking } from "@/hooks/use-page-tracking";
 
 const queryClient = new QueryClient();
 
@@ -41,10 +45,16 @@ function Router() {
       <Route path="/admin/projects" component={AdminProjects} />
       <Route path="/admin/projects/new" component={ProjectForm} />
       <Route path="/admin/projects/:id/edit" component={ProjectForm} />
+      <Route path="/admin/analytics" component={AdminAnalytics} />
       
       <Route component={NotFound} />
     </Switch>
   );
+}
+
+function AppInner({ children }: { children: React.ReactNode }) {
+  usePageTracking();
+  return <>{children}</>;
 }
 
 function MainLayout({ children }: { children: React.ReactNode }) {
@@ -71,11 +81,13 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-          <div className="min-h-[100dvh] flex flex-col bg-background text-foreground bg-circuit-pattern">
-            <MainLayout>
-              <Router />
-            </MainLayout>
-          </div>
+          <AppInner>
+            <div className="min-h-[100dvh] flex flex-col bg-background text-foreground bg-circuit-pattern">
+              <MainLayout>
+                <Router />
+              </MainLayout>
+            </div>
+          </AppInner>
         </WouterRouter>
         <Toaster />
       </TooltipProvider>

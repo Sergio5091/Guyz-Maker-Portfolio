@@ -17,13 +17,21 @@ import type {
 } from "@tanstack/react-query";
 
 import type {
+  AnalyticsStats,
   Article,
   CreateArticleBody,
   CreateProjectBody,
+  DailyViewCount,
+  GetAnalyticsStatsParams,
+  GetDailyViewsParams,
   HealthStatus,
   ListArticlesParams,
+  ListPageViewsParams,
   ListProjectsParams,
+  PageViewStat,
   Project,
+  TrackPageViewBody,
+  TrackPageViewResponse,
   UpdateArticleBody,
   UpdateProjectBody,
 } from "./api.schemas";
@@ -988,3 +996,374 @@ export const useDeleteProject = <
 > => {
   return useMutation(getDeleteProjectMutationOptions(options));
 };
+
+/**
+ * @summary Track a page view
+ */
+export const getTrackPageViewUrl = () => {
+  return `/api/analytics/pageview`;
+};
+
+export const trackPageView = async (
+  trackPageViewBody: TrackPageViewBody,
+  options?: RequestInit,
+): Promise<TrackPageViewResponse> => {
+  return customFetch<TrackPageViewResponse>(getTrackPageViewUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(trackPageViewBody),
+  });
+};
+
+export const getTrackPageViewMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof trackPageView>>,
+    TError,
+    { data: BodyType<TrackPageViewBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof trackPageView>>,
+  TError,
+  { data: BodyType<TrackPageViewBody> },
+  TContext
+> => {
+  const mutationKey = ["trackPageView"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof trackPageView>>,
+    { data: BodyType<TrackPageViewBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return trackPageView(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type TrackPageViewMutationResult = NonNullable<
+  Awaited<ReturnType<typeof trackPageView>>
+>;
+export type TrackPageViewMutationBody = BodyType<TrackPageViewBody>;
+export type TrackPageViewMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Track a page view
+ */
+export const useTrackPageView = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof trackPageView>>,
+    TError,
+    { data: BodyType<TrackPageViewBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof trackPageView>>,
+  TError,
+  { data: BodyType<TrackPageViewBody> },
+  TContext
+> => {
+  return useMutation(getTrackPageViewMutationOptions(options));
+};
+
+/**
+ * @summary Get overall analytics stats
+ */
+export const getGetAnalyticsStatsUrl = (params?: GetAnalyticsStatsParams) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/analytics/stats?${stringifiedParams}`
+    : `/api/analytics/stats`;
+};
+
+export const getAnalyticsStats = async (
+  params?: GetAnalyticsStatsParams,
+  options?: RequestInit,
+): Promise<AnalyticsStats> => {
+  return customFetch<AnalyticsStats>(getGetAnalyticsStatsUrl(params), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetAnalyticsStatsQueryKey = (
+  params?: GetAnalyticsStatsParams,
+) => {
+  return [`/api/analytics/stats`, ...(params ? [params] : [])] as const;
+};
+
+export const getGetAnalyticsStatsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getAnalyticsStats>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: GetAnalyticsStatsParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getAnalyticsStats>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetAnalyticsStatsQueryKey(params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getAnalyticsStats>>
+  > = ({ signal }) => getAnalyticsStats(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getAnalyticsStats>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetAnalyticsStatsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getAnalyticsStats>>
+>;
+export type GetAnalyticsStatsQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Get overall analytics stats
+ */
+
+export function useGetAnalyticsStats<
+  TData = Awaited<ReturnType<typeof getAnalyticsStats>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: GetAnalyticsStatsParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getAnalyticsStats>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetAnalyticsStatsQueryOptions(params, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Get page views by path
+ */
+export const getListPageViewsUrl = (params?: ListPageViewsParams) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/analytics/pageviews?${stringifiedParams}`
+    : `/api/analytics/pageviews`;
+};
+
+export const listPageViews = async (
+  params?: ListPageViewsParams,
+  options?: RequestInit,
+): Promise<PageViewStat[]> => {
+  return customFetch<PageViewStat[]>(getListPageViewsUrl(params), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getListPageViewsQueryKey = (params?: ListPageViewsParams) => {
+  return [`/api/analytics/pageviews`, ...(params ? [params] : [])] as const;
+};
+
+export const getListPageViewsQueryOptions = <
+  TData = Awaited<ReturnType<typeof listPageViews>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: ListPageViewsParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof listPageViews>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getListPageViewsQueryKey(params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof listPageViews>>> = ({
+    signal,
+  }) => listPageViews(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listPageViews>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type ListPageViewsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listPageViews>>
+>;
+export type ListPageViewsQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Get page views by path
+ */
+
+export function useListPageViews<
+  TData = Awaited<ReturnType<typeof listPageViews>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: ListPageViewsParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof listPageViews>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getListPageViewsQueryOptions(params, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Get daily visit counts for chart
+ */
+export const getGetDailyViewsUrl = (params?: GetDailyViewsParams) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/analytics/daily?${stringifiedParams}`
+    : `/api/analytics/daily`;
+};
+
+export const getDailyViews = async (
+  params?: GetDailyViewsParams,
+  options?: RequestInit,
+): Promise<DailyViewCount[]> => {
+  return customFetch<DailyViewCount[]>(getGetDailyViewsUrl(params), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetDailyViewsQueryKey = (params?: GetDailyViewsParams) => {
+  return [`/api/analytics/daily`, ...(params ? [params] : [])] as const;
+};
+
+export const getGetDailyViewsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getDailyViews>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: GetDailyViewsParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getDailyViews>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetDailyViewsQueryKey(params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getDailyViews>>> = ({
+    signal,
+  }) => getDailyViews(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getDailyViews>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetDailyViewsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getDailyViews>>
+>;
+export type GetDailyViewsQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Get daily visit counts for chart
+ */
+
+export function useGetDailyViews<
+  TData = Awaited<ReturnType<typeof getDailyViews>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: GetDailyViewsParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getDailyViews>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetDailyViewsQueryOptions(params, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}

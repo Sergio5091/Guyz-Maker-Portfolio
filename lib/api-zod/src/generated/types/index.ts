@@ -6,21 +6,29 @@
  * OpenAPI spec version: 0.1.0
  */
 
+export * from "./analyticsStats";
 export * from "./article";
 export * from "./articlePillar";
 export * from "./createArticleBody";
 export * from "./createArticleBodyPillar";
 export * from "./createProjectBody";
 export * from "./createProjectBodyCategory";
+export * from "./dailyViewCount";
+export * from "./getAnalyticsStatsParams";
+export * from "./getDailyViewsParams";
 export * from "./healthStatus";
 export * from "./listArticlesParams";
 export * from "./listArticlesPillar";
 export * from "./listArticlesPublished";
+export * from "./listPageViewsParams";
 export * from "./listProjectsCategory";
 export * from "./listProjectsFeatured";
 export * from "./listProjectsParams";
+export * from "./pageViewStat";
 export * from "./project";
 export * from "./projectCategory";
+export * from "./trackPageViewBody";
+export * from "./trackPageViewResponse";
 export * from "./updateArticleBody";
 export * from "./updateArticleBodyPillar";
 export * from "./updateProjectBody";

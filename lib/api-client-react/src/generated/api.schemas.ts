@@ -170,6 +170,40 @@ export interface UpdateProjectBody {
   status?: string;
 }
 
+export interface TrackPageViewBody {
+  path: string;
+  /** @nullable */
+  title?: string | null;
+  /** @nullable */
+  referrer?: string | null;
+}
+
+export interface TrackPageViewResponse {
+  id: number;
+}
+
+export interface AnalyticsStats {
+  totalViews: number;
+  uniquePages: number;
+  todayViews: number;
+  weekViews: number;
+  /** @nullable */
+  topPage: string | null;
+}
+
+export interface PageViewStat {
+  path: string;
+  /** @nullable */
+  title: string | null;
+  views: number;
+  lastVisit: string;
+}
+
+export interface DailyViewCount {
+  date: string;
+  views: number;
+}
+
 export type ListArticlesParams = {
   pillar?: ListArticlesPillar;
   published?: ListArticlesPublished;
@@ -216,3 +250,16 @@ export const ListProjectsFeatured = {
   true: "true",
   false: "false",
 } as const;
+
+export type GetAnalyticsStatsParams = {
+  days?: number;
+};
+
+export type ListPageViewsParams = {
+  days?: number;
+  limit?: number;
+};
+
+export type GetDailyViewsParams = {
+  days?: number;
+};

@@ -14,6 +14,8 @@ tags:
     description: Blog article operations
   - name: projects
     description: Portfolio project operations
+  - name: analytics
+    description: Site analytics and tracking
 paths:
   /healthz:
     get:
@@ -245,6 +247,91 @@ paths:
         "404":
           description: Project not found
 
+  /analytics/pageview:
+    post:
+      operationId: trackPageView
+      tags: [analytics]
+      summary: Track a page view
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TrackPageViewBody"
+      responses:
+        "201":
+          description: Tracked
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TrackPageViewResponse"
+
+  /analytics/stats:
+    get:
+      operationId: getAnalyticsStats
+      tags: [analytics]
+      summary: Get overall analytics stats
+      parameters:
+        - name: days
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Analytics stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AnalyticsStats"
+
+  /analytics/pageviews:
+    get:
+      operationId: listPageViews
+      tags: [analytics]
+      summary: Get page views by path
+      parameters:
+        - name: days
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Page views list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PageViewStat"
+
+  /analytics/daily:
+    get:
+      operationId: getDailyViews
+      tags: [analytics]
+      summary: Get daily visit counts for chart
+      parameters:
+        - name: days
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Daily view counts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DailyViewCount"
+
 components:
   schemas:
     HealthStatus:
@@ -471,3 +558,72 @@ components:
           type: boolean
         status:
           type: string
+
+    TrackPageViewBody:
+      type: object
+      properties:
+        path:
+          type: string
+        title:
+          type: ["string", "null"]
+        referrer:
+          type: ["string", "null"]
+      required:
+        - path
+
+    TrackPageViewResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+      required:
+        - id
+
+    AnalyticsStats:
+      type: object
+      properties:
+        totalViews:
+          type: integer
+        uniquePages:
+          type: integer
+        todayViews:
+          type: integer
+        weekViews:
+          type: integer
+        topPage:
+          type: ["string", "null"]
+      required:
+        - totalViews
+        - uniquePages
+        - todayViews
+        - weekViews
+        - topPage
+
+    PageViewStat:
+      type: object
+      properties:
+        path:
+          type: string
+        title:
+          type: ["string", "null"]
+        views:
+          type: integer
+        lastVisit:
+          type: string
+          format: date-time
+      required:
+        - path
+        - title
+        - views
+        - lastVisit
+
+    DailyViewCount:
+      type: object
+      properties:
+        date:
+          type: string
+        views:
+          type: integer
+      required:
+        - date
+        - views
