@@ -8,3 +8,211 @@
 export interface HealthStatus {
   status: string;
 }
+
+export type ArticlePillar = (typeof ArticlePillar)[keyof typeof ArticlePillar];
+
+export const ArticlePillar = {
+  BUILD: "BUILD",
+  TEACH: "TEACH",
+  INSPIRE: "INSPIRE",
+  CONVERT: "CONVERT",
+} as const;
+
+export interface Article {
+  id: number;
+  title: string;
+  slug: string;
+  excerpt: string;
+  content: string;
+  pillar: ArticlePillar;
+  /** @nullable */
+  coverImage: string | null;
+  published: boolean;
+  /** @nullable */
+  readingTime: number | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type CreateArticleBodyPillar =
+  (typeof CreateArticleBodyPillar)[keyof typeof CreateArticleBodyPillar];
+
+export const CreateArticleBodyPillar = {
+  BUILD: "BUILD",
+  TEACH: "TEACH",
+  INSPIRE: "INSPIRE",
+  CONVERT: "CONVERT",
+} as const;
+
+export interface CreateArticleBody {
+  title: string;
+  slug: string;
+  excerpt: string;
+  content: string;
+  pillar: CreateArticleBodyPillar;
+  /** @nullable */
+  coverImage?: string | null;
+  published?: boolean;
+  /** @nullable */
+  readingTime?: number | null;
+}
+
+export type UpdateArticleBodyPillar =
+  (typeof UpdateArticleBodyPillar)[keyof typeof UpdateArticleBodyPillar];
+
+export const UpdateArticleBodyPillar = {
+  BUILD: "BUILD",
+  TEACH: "TEACH",
+  INSPIRE: "INSPIRE",
+  CONVERT: "CONVERT",
+} as const;
+
+export interface UpdateArticleBody {
+  title?: string;
+  slug?: string;
+  excerpt?: string;
+  content?: string;
+  pillar?: UpdateArticleBodyPillar;
+  /** @nullable */
+  coverImage?: string | null;
+  published?: boolean;
+  /** @nullable */
+  readingTime?: number | null;
+}
+
+export type ProjectCategory =
+  (typeof ProjectCategory)[keyof typeof ProjectCategory];
+
+export const ProjectCategory = {
+  IoT: "IoT",
+  Domotique: "Domotique",
+  Affichage: "Affichage",
+  SmartCity: "SmartCity",
+  Formation: "Formation",
+} as const;
+
+export interface Project {
+  id: number;
+  title: string;
+  slug: string;
+  description: string;
+  context: string;
+  problem: string;
+  solution: string;
+  techStack: string;
+  results: string;
+  category: ProjectCategory;
+  /** @nullable */
+  coverImage: string | null;
+  /** @nullable */
+  metric: string | null;
+  featured: boolean;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type CreateProjectBodyCategory =
+  (typeof CreateProjectBodyCategory)[keyof typeof CreateProjectBodyCategory];
+
+export const CreateProjectBodyCategory = {
+  IoT: "IoT",
+  Domotique: "Domotique",
+  Affichage: "Affichage",
+  SmartCity: "SmartCity",
+  Formation: "Formation",
+} as const;
+
+export interface CreateProjectBody {
+  title: string;
+  slug: string;
+  description: string;
+  context: string;
+  problem: string;
+  solution: string;
+  techStack: string;
+  results: string;
+  category: CreateProjectBodyCategory;
+  /** @nullable */
+  coverImage?: string | null;
+  /** @nullable */
+  metric?: string | null;
+  featured?: boolean;
+  status?: string;
+}
+
+export type UpdateProjectBodyCategory =
+  (typeof UpdateProjectBodyCategory)[keyof typeof UpdateProjectBodyCategory];
+
+export const UpdateProjectBodyCategory = {
+  IoT: "IoT",
+  Domotique: "Domotique",
+  Affichage: "Affichage",
+  SmartCity: "SmartCity",
+  Formation: "Formation",
+} as const;
+
+export interface UpdateProjectBody {
+  title?: string;
+  slug?: string;
+  description?: string;
+  context?: string;
+  problem?: string;
+  solution?: string;
+  techStack?: string;
+  results?: string;
+  category?: UpdateProjectBodyCategory;
+  /** @nullable */
+  coverImage?: string | null;
+  /** @nullable */
+  metric?: string | null;
+  featured?: boolean;
+  status?: string;
+}
+
+export type ListArticlesParams = {
+  pillar?: ListArticlesPillar;
+  published?: ListArticlesPublished;
+};
+
+export type ListArticlesPillar =
+  (typeof ListArticlesPillar)[keyof typeof ListArticlesPillar];
+
+export const ListArticlesPillar = {
+  BUILD: "BUILD",
+  TEACH: "TEACH",
+  INSPIRE: "INSPIRE",
+  CONVERT: "CONVERT",
+} as const;
+
+export type ListArticlesPublished =
+  (typeof ListArticlesPublished)[keyof typeof ListArticlesPublished];
+
+export const ListArticlesPublished = {
+  true: "true",
+  false: "false",
+} as const;
+
+export type ListProjectsParams = {
+  category?: ListProjectsCategory;
+  featured?: ListProjectsFeatured;
+};
+
+export type ListProjectsCategory =
+  (typeof ListProjectsCategory)[keyof typeof ListProjectsCategory];
+
+export const ListProjectsCategory = {
+  IoT: "IoT",
+  Domotique: "Domotique",
+  Affichage: "Affichage",
+  SmartCity: "SmartCity",
+  Formation: "Formation",
+} as const;
+
+export type ListProjectsFeatured =
+  (typeof ListProjectsFeatured)[keyof typeof ListProjectsFeatured];
+
+export const ListProjectsFeatured = {
+  true: "true",
+  false: "false",
+} as const;

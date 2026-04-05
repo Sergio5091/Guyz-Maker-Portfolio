@@ -14,3 +14,250 @@ import * as zod from "zod";
 export const HealthCheckResponse = zod.object({
   status: zod.string(),
 });
+
+/**
+ * @summary List all articles
+ */
+export const ListArticlesQueryParams = zod.object({
+  pillar: zod.enum(["BUILD", "TEACH", "INSPIRE", "CONVERT"]).optional(),
+  published: zod.enum(["true", "false"]).optional(),
+});
+
+export const ListArticlesResponseItem = zod.object({
+  id: zod.number(),
+  title: zod.string(),
+  slug: zod.string(),
+  excerpt: zod.string(),
+  content: zod.string(),
+  pillar: zod.enum(["BUILD", "TEACH", "INSPIRE", "CONVERT"]),
+  coverImage: zod.string().nullable(),
+  published: zod.boolean(),
+  readingTime: zod.number().nullable(),
+  createdAt: zod.coerce.date(),
+  updatedAt: zod.coerce.date(),
+});
+export const ListArticlesResponse = zod.array(ListArticlesResponseItem);
+
+/**
+ * @summary Create a new article
+ */
+export const CreateArticleBody = zod.object({
+  title: zod.string(),
+  slug: zod.string(),
+  excerpt: zod.string(),
+  content: zod.string(),
+  pillar: zod.enum(["BUILD", "TEACH", "INSPIRE", "CONVERT"]),
+  coverImage: zod.string().nullish(),
+  published: zod.boolean().optional(),
+  readingTime: zod.number().nullish(),
+});
+
+/**
+ * @summary Get an article by ID
+ */
+export const GetArticleParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const GetArticleResponse = zod.object({
+  id: zod.number(),
+  title: zod.string(),
+  slug: zod.string(),
+  excerpt: zod.string(),
+  content: zod.string(),
+  pillar: zod.enum(["BUILD", "TEACH", "INSPIRE", "CONVERT"]),
+  coverImage: zod.string().nullable(),
+  published: zod.boolean(),
+  readingTime: zod.number().nullable(),
+  createdAt: zod.coerce.date(),
+  updatedAt: zod.coerce.date(),
+});
+
+/**
+ * @summary Update an article
+ */
+export const UpdateArticleParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const UpdateArticleBody = zod.object({
+  title: zod.string().optional(),
+  slug: zod.string().optional(),
+  excerpt: zod.string().optional(),
+  content: zod.string().optional(),
+  pillar: zod.enum(["BUILD", "TEACH", "INSPIRE", "CONVERT"]).optional(),
+  coverImage: zod.string().nullish(),
+  published: zod.boolean().optional(),
+  readingTime: zod.number().nullish(),
+});
+
+export const UpdateArticleResponse = zod.object({
+  id: zod.number(),
+  title: zod.string(),
+  slug: zod.string(),
+  excerpt: zod.string(),
+  content: zod.string(),
+  pillar: zod.enum(["BUILD", "TEACH", "INSPIRE", "CONVERT"]),
+  coverImage: zod.string().nullable(),
+  published: zod.boolean(),
+  readingTime: zod.number().nullable(),
+  createdAt: zod.coerce.date(),
+  updatedAt: zod.coerce.date(),
+});
+
+/**
+ * @summary Delete an article
+ */
+export const DeleteArticleParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+/**
+ * @summary List all projects
+ */
+export const ListProjectsQueryParams = zod.object({
+  category: zod
+    .enum(["IoT", "Domotique", "Affichage", "SmartCity", "Formation"])
+    .optional(),
+  featured: zod.enum(["true", "false"]).optional(),
+});
+
+export const ListProjectsResponseItem = zod.object({
+  id: zod.number(),
+  title: zod.string(),
+  slug: zod.string(),
+  description: zod.string(),
+  context: zod.string(),
+  problem: zod.string(),
+  solution: zod.string(),
+  techStack: zod.string(),
+  results: zod.string(),
+  category: zod.enum([
+    "IoT",
+    "Domotique",
+    "Affichage",
+    "SmartCity",
+    "Formation",
+  ]),
+  coverImage: zod.string().nullable(),
+  metric: zod.string().nullable(),
+  featured: zod.boolean(),
+  status: zod.string(),
+  createdAt: zod.coerce.date(),
+  updatedAt: zod.coerce.date(),
+});
+export const ListProjectsResponse = zod.array(ListProjectsResponseItem);
+
+/**
+ * @summary Create a new project
+ */
+export const CreateProjectBody = zod.object({
+  title: zod.string(),
+  slug: zod.string(),
+  description: zod.string(),
+  context: zod.string(),
+  problem: zod.string(),
+  solution: zod.string(),
+  techStack: zod.string(),
+  results: zod.string(),
+  category: zod.enum([
+    "IoT",
+    "Domotique",
+    "Affichage",
+    "SmartCity",
+    "Formation",
+  ]),
+  coverImage: zod.string().nullish(),
+  metric: zod.string().nullish(),
+  featured: zod.boolean().optional(),
+  status: zod.string().optional(),
+});
+
+/**
+ * @summary Get a project by ID
+ */
+export const GetProjectParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const GetProjectResponse = zod.object({
+  id: zod.number(),
+  title: zod.string(),
+  slug: zod.string(),
+  description: zod.string(),
+  context: zod.string(),
+  problem: zod.string(),
+  solution: zod.string(),
+  techStack: zod.string(),
+  results: zod.string(),
+  category: zod.enum([
+    "IoT",
+    "Domotique",
+    "Affichage",
+    "SmartCity",
+    "Formation",
+  ]),
+  coverImage: zod.string().nullable(),
+  metric: zod.string().nullable(),
+  featured: zod.boolean(),
+  status: zod.string(),
+  createdAt: zod.coerce.date(),
+  updatedAt: zod.coerce.date(),
+});
+
+/**
+ * @summary Update a project
+ */
+export const UpdateProjectParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const UpdateProjectBody = zod.object({
+  title: zod.string().optional(),
+  slug: zod.string().optional(),
+  description: zod.string().optional(),
+  context: zod.string().optional(),
+  problem: zod.string().optional(),
+  solution: zod.string().optional(),
+  techStack: zod.string().optional(),
+  results: zod.string().optional(),
+  category: zod
+    .enum(["IoT", "Domotique", "Affichage", "SmartCity", "Formation"])
+    .optional(),
+  coverImage: zod.string().nullish(),
+  metric: zod.string().nullish(),
+  featured: zod.boolean().optional(),
+  status: zod.string().optional(),
+});
+
+export const UpdateProjectResponse = zod.object({
+  id: zod.number(),
+  title: zod.string(),
+  slug: zod.string(),
+  description: zod.string(),
+  context: zod.string(),
+  problem: zod.string(),
+  solution: zod.string(),
+  techStack: zod.string(),
+  results: zod.string(),
+  category: zod.enum([
+    "IoT",
+    "Domotique",
+    "Affichage",
+    "SmartCity",
+    "Formation",
+  ]),
+  coverImage: zod.string().nullable(),
+  metric: zod.string().nullable(),
+  featured: zod.boolean(),
+  status: zod.string(),
+  createdAt: zod.coerce.date(),
+  updatedAt: zod.coerce.date(),
+});
+
+/**
+ * @summary Delete a project
+ */
+export const DeleteProjectParams = zod.object({
+  id: zod.coerce.number(),
+});

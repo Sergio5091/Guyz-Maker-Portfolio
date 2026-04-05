@@ -10,6 +10,10 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: articles
+    description: Blog article operations
+  - name: projects
+    description: Portfolio project operations
 paths:
   /healthz:
     get:
@@ -24,6 +28,223 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /articles:
+    get:
+      operationId: listArticles
+      tags: [articles]
+      summary: List all articles
+      parameters:
+        - name: pillar
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [BUILD, TEACH, INSPIRE, CONVERT]
+        - name: published
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: ["true", "false"]
+      responses:
+        "200":
+          description: List of articles
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Article"
+    post:
+      operationId: createArticle
+      tags: [articles]
+      summary: Create a new article
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateArticleBody"
+      responses:
+        "201":
+          description: Created article
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Article"
+        "400":
+          description: Invalid input
+
+  /articles/{id}:
+    get:
+      operationId: getArticle
+      tags: [articles]
+      summary: Get an article by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Article found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Article"
+        "404":
+          description: Article not found
+    patch:
+      operationId: updateArticle
+      tags: [articles]
+      summary: Update an article
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateArticleBody"
+      responses:
+        "200":
+          description: Updated article
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Article"
+        "404":
+          description: Article not found
+    delete:
+      operationId: deleteArticle
+      tags: [articles]
+      summary: Delete an article
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Article not found
+
+  /projects:
+    get:
+      operationId: listProjects
+      tags: [projects]
+      summary: List all projects
+      parameters:
+        - name: category
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [IoT, Domotique, Affichage, SmartCity, Formation]
+        - name: featured
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: ["true", "false"]
+      responses:
+        "200":
+          description: List of projects
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Project"
+    post:
+      operationId: createProject
+      tags: [projects]
+      summary: Create a new project
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateProjectBody"
+      responses:
+        "201":
+          description: Created project
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Project"
+        "400":
+          description: Invalid input
+
+  /projects/{id}:
+    get:
+      operationId: getProject
+      tags: [projects]
+      summary: Get a project by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Project found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Project"
+        "404":
+          description: Project not found
+    patch:
+      operationId: updateProject
+      tags: [projects]
+      summary: Update a project
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateProjectBody"
+      responses:
+        "200":
+          description: Updated project
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Project"
+        "404":
+          description: Project not found
+    delete:
+      operationId: deleteProject
+      tags: [projects]
+      summary: Delete a project
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Project not found
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +255,219 @@ components:
       required:
         - status
 
+    Article:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        slug:
+          type: string
+        excerpt:
+          type: string
+        content:
+          type: string
+        pillar:
+          type: string
+          enum: [BUILD, TEACH, INSPIRE, CONVERT]
+        coverImage:
+          type: ["string", "null"]
+        published:
+          type: boolean
+        readingTime:
+          type: ["integer", "null"]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - title
+        - slug
+        - excerpt
+        - content
+        - pillar
+        - coverImage
+        - published
+        - readingTime
+        - createdAt
+        - updatedAt
+
+    CreateArticleBody:
+      type: object
+      properties:
+        title:
+          type: string
+        slug:
+          type: string
+        excerpt:
+          type: string
+        content:
+          type: string
+        pillar:
+          type: string
+          enum: [BUILD, TEACH, INSPIRE, CONVERT]
+        coverImage:
+          type: ["string", "null"]
+        published:
+          type: boolean
+        readingTime:
+          type: ["integer", "null"]
+      required:
+        - title
+        - slug
+        - excerpt
+        - content
+        - pillar
+
+    UpdateArticleBody:
+      type: object
+      properties:
+        title:
+          type: string
+        slug:
+          type: string
+        excerpt:
+          type: string
+        content:
+          type: string
+        pillar:
+          type: string
+          enum: [BUILD, TEACH, INSPIRE, CONVERT]
+        coverImage:
+          type: ["string", "null"]
+        published:
+          type: boolean
+        readingTime:
+          type: ["integer", "null"]
+
+    Project:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        slug:
+          type: string
+        description:
+          type: string
+        context:
+          type: string
+        problem:
+          type: string
+        solution:
+          type: string
+        techStack:
+          type: string
+        results:
+          type: string
+        category:
+          type: string
+          enum: [IoT, Domotique, Affichage, SmartCity, Formation]
+        coverImage:
+          type: ["string", "null"]
+        metric:
+          type: ["string", "null"]
+        featured:
+          type: boolean
+        status:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - title
+        - slug
+        - description
+        - context
+        - problem
+        - solution
+        - techStack
+        - results
+        - category
+        - coverImage
+        - metric
+        - featured
+        - status
+        - createdAt
+        - updatedAt
+
+    CreateProjectBody:
+      type: object
+      properties:
+        title:
+          type: string
+        slug:
+          type: string
+        description:
+          type: string
+        context:
+          type: string
+        problem:
+          type: string
+        solution:
+          type: string
+        techStack:
+          type: string
+        results:
+          type: string
+        category:
+          type: string
+          enum: [IoT, Domotique, Affichage, SmartCity, Formation]
+        coverImage:
+          type: ["string", "null"]
+        metric:
+          type: ["string", "null"]
+        featured:
+          type: boolean
+        status:
+          type: string
+      required:
+        - title
+        - slug
+        - description
+        - context
+        - problem
+        - solution
+        - techStack
+        - results
+        - category
+
+    UpdateProjectBody:
+      type: object
+      properties:
+        title:
+          type: string
+        slug:
+          type: string
+        description:
+          type: string
+        context:
+          type: string
+        problem:
+          type: string
+        solution:
+          type: string
+        techStack:
+          type: string
+        results:
+          type: string
+        category:
+          type: string
+          enum: [IoT, Domotique, Affichage, SmartCity, Formation]
+        coverImage:
+          type: ["string", "null"]
+        metric:
+          type: ["string", "null"]
+        featured:
+          type: boolean
+        status:
+          type: string
