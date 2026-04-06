@@ -22,7 +22,7 @@ export function Navbar() {
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <Link href="/" className="flex items-center space-x-2">
           <img 
-            src="/images/logo.svg" 
+            src="/assets/original.svg" 
             alt="Guyz Maker" 
             className="h-16 w-auto"
           />

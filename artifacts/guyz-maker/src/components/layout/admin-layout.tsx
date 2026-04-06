@@ -54,7 +54,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         <div className="p-6">
           <Link href="/admin" className="flex items-center gap-2">
           <img 
-            src="/images/logo-white.svg" 
+            src="/assets/blanc.svg" 
             alt="Guyz Maker" 
             className="h-12 w-auto"
           />
@@ -86,7 +86,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         <header className="md:hidden flex items-center justify-between p-4 bg-[#1a1a2e] text-white">
           <Link href="/admin" className="flex items-center gap-2">
             <img 
-              src="/images/logo-white.svg" 
+              src="/assets/blanc.svg" 
               alt="Guyz Maker" 
               className="h-12 w-auto"
             />
@@ -101,7 +101,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               <div className="p-6">
                 <Link href="/admin" className="flex items-center gap-2">
                   <img 
-                    src="/images/logo-white.svg" 
+                    src="/assets/blanc.svg" 
                     alt="Guyz Maker" 
                     className="h-12 w-auto"
                   />

@@ -8,7 +8,7 @@ export function Footer() {
         <div className="space-y-4">
           <Link href="/" className="inline-block">
             <img 
-              src="/images/logo-white.svg" 
+              src="/assets/blanc.svg" 
               alt="Guyz Maker" 
               className="h-20 w-auto"
             />
