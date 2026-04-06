@@ -1,0 +1,18 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://guyzmaker.com/sitemap.xml
+
+# Bloquer les pages d'administration
+Disallow: /admin/
+Disallow: /admin
+Disallow: /api/
+
+# Autoriser les ressources importantes
+Allow: /images/
+Allow: /css/
+Allow: /js/
+
+# Crawl-delay pour être respectueux
+Crawl-delay: 1

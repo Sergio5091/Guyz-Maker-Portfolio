@@ -23,6 +23,7 @@ import { Switch } from "@/components/ui/switch";
 import { ArrowLeft, Save, Trash2, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import ImageUpload from "@/components/ImageUpload";
 
 const formSchema = z.object({
   title: z.string().min(1, "Title is required").max(100),
@@ -299,10 +300,11 @@ export default function ArticleForm() {
                     name="coverImage"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Cover Image URL</FormLabel>
-                        <FormControl>
-                          <Input placeholder="https://..." className="bg-gray-50/50" {...field} value={field.value || ""} />
-                        </FormControl>
+                        <ImageUpload
+                          value={field.value || ""}
+                          onChange={field.onChange}
+                          className="space-y-2"
+                        />
                         <FormMessage />
                       </FormItem>
                     )}

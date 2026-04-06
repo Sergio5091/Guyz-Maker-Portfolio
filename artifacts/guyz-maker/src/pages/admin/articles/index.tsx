@@ -43,7 +43,7 @@ export default function AdminArticles() {
     });
   };
 
-  const filteredArticles = articles?.filter(a => {
+  const filteredArticles = Array.isArray(articles) ? articles.filter(a => {
     if (search && !a.title.toLowerCase().includes(search.toLowerCase())) return false;
     if (pillarFilter !== "all" && a.pillar !== pillarFilter) return false;
     if (statusFilter !== "all") {
@@ -51,7 +51,7 @@ export default function AdminArticles() {
       if (a.published !== isPublished) return false;
     }
     return true;
-  });
+  }) : [];
 
   return (
     <AdminLayout>
@@ -126,14 +126,14 @@ export default function AdminArticles() {
                   <TableCell className="text-right"><Skeleton className="h-8 w-8 ml-auto" /></TableCell>
                 </TableRow>
               ))
-            ) : filteredArticles?.length === 0 ? (
+            ) : Array.isArray(filteredArticles) && filteredArticles.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} className="h-32 text-center text-gray-500">
                   No articles found. Try adjusting your filters.
                 </TableCell>
               </TableRow>
             ) : (
-              filteredArticles?.map((article) => (
+              Array.isArray(filteredArticles) && filteredArticles.map((article) => (
                 <TableRow key={article.id} className="hover:bg-gray-50/50">
                   <TableCell className="font-medium text-gray-900">{article.title}</TableCell>
                   <TableCell>
@@ -149,7 +149,7 @@ export default function AdminArticles() {
                     )}
                   </TableCell>
                   <TableCell className="text-gray-500 text-sm">
-                    {format(new Date(article.createdAt), "MMM d, yyyy")}
+                    {article.createdAt ? format(new Date(article.createdAt), "MMM d, yyyy") : "No date"}
                   </TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>

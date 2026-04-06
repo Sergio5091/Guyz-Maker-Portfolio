@@ -43,7 +43,7 @@ export default function AdminProjects() {
     });
   };
 
-  const filteredProjects = projects?.filter(p => {
+  const filteredProjects = Array.isArray(projects) ? projects.filter(p => {
     if (search && !p.title.toLowerCase().includes(search.toLowerCase())) return false;
     if (categoryFilter !== "all" && p.category !== categoryFilter) return false;
     if (featuredFilter !== "all") {
@@ -51,7 +51,7 @@ export default function AdminProjects() {
       if (p.featured !== isFeatured) return false;
     }
     return true;
-  });
+  }) : [];
 
   return (
     <AdminLayout>
@@ -127,14 +127,14 @@ export default function AdminProjects() {
                   <TableCell className="text-right"><Skeleton className="h-8 w-8 ml-auto" /></TableCell>
                 </TableRow>
               ))
-            ) : filteredProjects?.length === 0 ? (
+            ) : Array.isArray(filteredProjects) && filteredProjects.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} className="h-32 text-center text-gray-500">
                   No projects found. Try adjusting your filters.
                 </TableCell>
               </TableRow>
             ) : (
-              filteredProjects?.map((project) => (
+              Array.isArray(filteredProjects) && filteredProjects.map((project) => (
                 <TableRow key={project.id} className="hover:bg-gray-50/50">
                   <TableCell className="font-medium text-gray-900">
                     <div className="flex items-center gap-2">

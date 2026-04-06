@@ -1,19 +1,19 @@
-import { pgTable, text, serial, timestamp, boolean, integer } from "drizzle-orm/pg-core";
+import { mysqlTable, varchar, serial, datetime, boolean, int, text } from "drizzle-orm/mysql-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
-export const articlesTable = pgTable("articles", {
+export const articlesTable = mysqlTable("articles", {
   id: serial("id").primaryKey(),
-  title: text("title").notNull(),
-  slug: text("slug").notNull().unique(),
-  excerpt: text("excerpt").notNull(),
+  title: varchar("title", { length: 255 }).notNull(),
+  slug: varchar("slug", { length: 255 }).notNull().unique(),
+  excerpt: varchar("excerpt", { length: 500 }).notNull(),
   content: text("content").notNull(),
-  pillar: text("pillar").notNull(),
-  coverImage: text("cover_image"),
+  pillar: varchar("pillar", { length: 50 }).notNull(),
+  coverImage: varchar("cover_image", { length: 255 }),
   published: boolean("published").notNull().default(false),
-  readingTime: integer("reading_time"),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
+  readingTime: int("reading_time"),
+  createdAt: datetime("created_at").notNull().default(new Date()),
+  updatedAt: datetime("updated_at").notNull().default(new Date()).$onUpdate(() => new Date()),
 });
 
 export const insertArticleSchema = createInsertSchema(articlesTable).omit({ id: true, createdAt: true, updatedAt: true });

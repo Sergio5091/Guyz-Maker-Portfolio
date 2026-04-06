@@ -6,9 +6,13 @@ export function Footer() {
     <footer className="bg-foreground text-background py-12 mt-auto">
       <div className="container mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-8">
         <div className="space-y-4">
-          <span className="font-orbitron text-2xl font-black tracking-tight">
-            GUYZ<span className="text-primary">MAKER</span>
-          </span>
+          <Link href="/" className="inline-block">
+            <img 
+              src="/images/logo-white.svg" 
+              alt="Guyz Maker" 
+              className="h-20 w-auto"
+            />
+          </Link>
           <p className="text-background/70 text-sm max-w-xs">
             L'ingénierie au service de l'innovation : De l'idée au produit intelligent. Construit depuis Cotonou, Bénin.
           </p>

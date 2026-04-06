@@ -3,10 +3,17 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "wouter";
 import { motion } from "framer-motion";
 import { ArrowRight, Cpu, LineChart, Home as HomeIcon } from "lucide-react";
+import SEO from "@/components/SEO";
 
 export default function Home() {
   return (
-    <div className="w-full">
+    <>
+      <SEO 
+        title="Guyz Maker - Ingénierie & Innovation | IoT, Domotique & Automatisation au Bénin"
+        description="Expert en ingénierie IoT, domotique et automatisation au Bénin. De l'idée au produit intelligent. INOVA Makerspace, Optimatics, Aura Controle."
+        keywords="Guyz Maker, ingénierie Bénin, IoT, domotique, automatisation, Cotonou, innovation, fabrication, makerspace, développement matériel, smart home"
+      />
+      <div className="w-full">
       {/* Hero Section */}
       <section className="relative w-full h-[90vh] min-h-[600px] flex items-center bg-foreground overflow-hidden">
         <div className="absolute inset-0 z-0">
@@ -173,6 +180,7 @@ export default function Home() {
           </Button>
         </form>
       </section>
-    </div>
+      </div>
+    </>
   );
 }

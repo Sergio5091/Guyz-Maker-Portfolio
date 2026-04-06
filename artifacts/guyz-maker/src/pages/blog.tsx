@@ -2,60 +2,34 @@ import { motion } from "framer-motion";
 import { Link } from "wouter";
 import { ArrowRight, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useListArticles } from "@workspace/api-client-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
+import { useState } from "react";
 
 const pillars = ["TOUS", "BUILD", "TEACH", "INSPIRE", "CONVERT"];
 
-const articles = [
-  {
-    id: 1,
-    title: "Pourquoi l'Afrique doit concevoir son propre Hardware",
-    pillar: "INSPIRE",
-    date: "12 Oct 2023",
-    excerpt: "La souveraineté technologique ne passe pas seulement par le logiciel. Il est temps de construire nos propres circuits imprimés.",
-    img: "/images/gallery-1.png",
-    featured: true
-  },
-  {
-    id: 2,
-    title: "Guide: Automatiser sa PME avec Make et Airtable",
-    pillar: "CONVERT",
-    date: "05 Nov 2023",
-    excerpt: "Comment nous avons réduit le temps administratif d'une PME béninoise de 15h par semaine avec des outils NoCode.",
-    img: "/images/gallery-3.png",
-    featured: false
-  },
-  {
-    id: 3,
-    title: "ESP32 vs ESP8266: Lequel choisir pour vos projets IoT industriels ?",
-    pillar: "BUILD",
-    date: "28 Nov 2023",
-    excerpt: "Une analyse comparative technique basée sur nos déploiements réels chez INOVA Makers.",
-    img: "/images/gallery-2.png",
-    featured: false
-  },
-  {
-    id: 4,
-    title: "Initier les jeunes au prototypage rapide avec le FabLab BLOLAB",
-    pillar: "TEACH",
-    date: "10 Dec 2023",
-    excerpt: "Retour d'expérience sur nos ateliers de formation à l'impression 3D et l'électronique de base.",
-    img: "/images/inova.png",
-    featured: false
-  },
-  {
-    id: 5,
-    title: "Les défis du déploiement LoRaWAN en milieu urbain africain",
-    pillar: "BUILD",
-    date: "15 Jan 2024",
-    excerpt: "Ce que nous avons appris en installant des capteurs environnementaux à Cotonou.",
-    img: "/images/hero-bg.png",
-    featured: false
-  }
-];
-
 export default function Blog() {
-  const featured = articles.find(a => a.featured);
-  const rest = articles.filter(a => !a.featured);
+  const { data: articles, isLoading } = useListArticles();
+  const [selectedPillar, setSelectedPillar] = useState("TOUS");
+  const [searchQuery, setSearchQuery] = useState("");
+  
+  // Filter only published articles
+  const publishedArticles = Array.isArray(articles) ? articles.filter(article => article.published) : [];
+  
+  // Apply filters
+  const filteredArticles = publishedArticles.filter(article => {
+    const matchesPillar = selectedPillar === "TOUS" || article.pillar === selectedPillar;
+    const matchesSearch = searchQuery === "" || 
+      article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      article.excerpt?.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesPillar && matchesSearch;
+  });
+  
+  // Take the most recent article as featured, or first one with coverImage from filtered results
+  const featured = filteredArticles.find(a => a.coverImage) || filteredArticles[0];
+  const rest = filteredArticles.filter(a => a.id !== featured?.id);
 
   return (
     <div className="w-full pb-24 pt-12">
@@ -75,6 +49,8 @@ export default function Blog() {
             <input 
               type="text" 
               placeholder="Rechercher..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full md:w-64 bg-card border-2 border-border pl-10 pr-4 py-2 focus:outline-none focus:border-primary rounded-none"
             />
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -87,7 +63,8 @@ export default function Blog() {
             <Button
               key={pillar}
               variant="outline"
-              className={`rounded-none font-bold text-xs tracking-wider uppercase border-border text-foreground hover:border-primary hover:text-primary ${pillar === 'TOUS' ? 'bg-primary/10 text-primary border-primary' : ''}`}
+              onClick={() => setSelectedPillar(pillar)}
+              className={`rounded-none font-bold text-xs tracking-wider uppercase border-border text-foreground hover:border-primary hover:text-primary ${selectedPillar === pillar ? 'bg-primary/10 text-primary border-primary' : ''}`}
             >
               {pillar}
             </Button>
@@ -95,16 +72,20 @@ export default function Blog() {
         </div>
 
         {/* Featured Article */}
-        {featured && (
+        {isLoading ? (
+          <Skeleton className="mb-16 h-96 w-full" />
+        ) : featured ? (
           <div className="mb-16">
             <Link href={`/blog/${featured.id}`} className="group grid lg:grid-cols-2 gap-8 bg-card border border-border hover:border-primary transition-colors overflow-hidden">
               <div className="aspect-[4/3] lg:aspect-auto overflow-hidden">
-                <img src={featured.img} alt={featured.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 grayscale group-hover:grayscale-0" />
+                <img src={featured.coverImage || "/images/hero-bg.png"} alt={featured.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 grayscale group-hover:grayscale-0" />
               </div>
               <div className="p-8 flex flex-col justify-center">
                 <div className="flex items-center gap-4 mb-4 font-mono text-sm">
                   <span className="bg-primary text-white font-bold px-2 py-1 uppercase">{featured.pillar}</span>
-                  <span className="text-muted-foreground">{featured.date}</span>
+                  <span className="text-muted-foreground">
+                    {featured.createdAt ? format(new Date(featured.createdAt), "d MMM yyyy", { locale: fr }) : "Date inconnue"}
+                  </span>
                 </div>
                 <h2 className="text-3xl lg:text-4xl font-orbitron font-bold mb-4 group-hover:text-primary transition-colors leading-tight">
                   {featured.title}
@@ -118,41 +99,53 @@ export default function Blog() {
               </div>
             </Link>
           </div>
-        )}
+        ) : null}
 
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Article Grid */}
           <div className="lg:col-span-2 grid md:grid-cols-2 gap-8">
-            {rest.map((article, i) => (
-              <motion.div
-                key={article.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-              >
-                <Link href={`/blog/${article.id}`} className="group flex flex-col h-full bg-card border border-border hover:border-primary transition-colors">
-                  <div className="aspect-video overflow-hidden">
-                    <img src={article.img} alt={article.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 grayscale group-hover:grayscale-0" />
-                  </div>
-                  <div className="p-6 flex-1 flex flex-col">
-                    <div className="flex items-center justify-between mb-3 font-mono text-xs">
-                      <span className="text-primary font-bold uppercase">{article.pillar}</span>
-                      <span className="text-muted-foreground">{article.date}</span>
+            {isLoading ? (
+              Array.from({ length: 6 }).map((_, i) => (
+                <Skeleton key={i} className="h-80 w-full" />
+              ))
+            ) : filteredArticles.length === 0 ? (
+              <div className="col-span-2 text-center py-12">
+                <p className="text-muted-foreground">Aucun article trouvé pour cette recherche ou ce filtre.</p>
+              </div>
+            ) : (
+              rest.map((article, i) => (
+                <motion.div
+                  key={article.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.1 }}
+                >
+                  <Link href={`/blog/${article.id}`} className="group flex flex-col h-full bg-card border border-border hover:border-primary transition-colors">
+                    <div className="aspect-video overflow-hidden">
+                      <img src={article.coverImage || "/images/hero-bg.png"} alt={article.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 grayscale group-hover:grayscale-0" />
                     </div>
-                    <h3 className="text-xl font-orbitron font-bold mb-3 group-hover:text-primary transition-colors">
-                      {article.title}
-                    </h3>
-                    <p className="text-muted-foreground text-sm mb-6 flex-1">
-                      {article.excerpt}
-                    </p>
-                    <div className="flex items-center text-foreground font-bold uppercase tracking-wider text-xs mt-auto">
-                      Lire <ArrowRight className="ml-1 h-3 w-3 transition-transform group-hover:translate-x-1" />
+                    <div className="p-6 flex-1 flex flex-col">
+                      <div className="flex items-center justify-between mb-3 font-mono text-xs">
+                        <span className="text-primary font-bold uppercase">{article.pillar}</span>
+                        <span className="text-muted-foreground">
+                          {article.createdAt ? format(new Date(article.createdAt), "d MMM yyyy", { locale: fr }) : "Date inconnue"}
+                        </span>
+                      </div>
+                      <h3 className="text-xl font-orbitron font-bold mb-3 group-hover:text-primary transition-colors">
+                        {article.title}
+                      </h3>
+                      <p className="text-muted-foreground text-sm mb-6 flex-1">
+                        {article.excerpt}
+                      </p>
+                      <div className="flex items-center text-foreground font-bold uppercase tracking-wider text-xs mt-auto">
+                        Lire <ArrowRight className="ml-1 h-3 w-3 transition-transform group-hover:translate-x-1" />
+                      </div>
                     </div>
-                  </div>
-                </Link>
-              </motion.div>
-            ))}
+                  </Link>
+                </motion.div>
+              ))
+            )}
           </div>
 
           {/* Sidebar */}
@@ -180,17 +173,29 @@ export default function Blog() {
                 <span className="text-primary mr-2">/</span> Piliers
               </h3>
               <ul className="space-y-2 font-mono text-sm">
-                <li className="flex justify-between items-center hover:text-primary cursor-pointer transition-colors">
-                  <span>&gt; BUILD</span> <span className="text-muted-foreground">12</span>
+                <li 
+                  className="flex justify-between items-center hover:text-primary cursor-pointer transition-colors"
+                  onClick={() => setSelectedPillar("BUILD")}
+                >
+                  <span>&gt; BUILD</span> <span className="text-muted-foreground">{publishedArticles.filter(a => a.pillar === "BUILD").length}</span>
                 </li>
-                <li className="flex justify-between items-center hover:text-primary cursor-pointer transition-colors">
-                  <span>&gt; TEACH</span> <span className="text-muted-foreground">8</span>
+                <li 
+                  className="flex justify-between items-center hover:text-primary cursor-pointer transition-colors"
+                  onClick={() => setSelectedPillar("TEACH")}
+                >
+                  <span>&gt; TEACH</span> <span className="text-muted-foreground">{publishedArticles.filter(a => a.pillar === "TEACH").length}</span>
                 </li>
-                <li className="flex justify-between items-center hover:text-primary cursor-pointer transition-colors">
-                  <span>&gt; INSPIRE</span> <span className="text-muted-foreground">15</span>
+                <li 
+                  className="flex justify-between items-center hover:text-primary cursor-pointer transition-colors"
+                  onClick={() => setSelectedPillar("INSPIRE")}
+                >
+                  <span>&gt; INSPIRE</span> <span className="text-muted-foreground">{publishedArticles.filter(a => a.pillar === "INSPIRE").length}</span>
                 </li>
-                <li className="flex justify-between items-center hover:text-primary cursor-pointer transition-colors">
-                  <span>&gt; CONVERT</span> <span className="text-muted-foreground">6</span>
+                <li 
+                  className="flex justify-between items-center hover:text-primary cursor-pointer transition-colors"
+                  onClick={() => setSelectedPillar("CONVERT")}
+                >
+                  <span>&gt; CONVERT</span> <span className="text-muted-foreground">{publishedArticles.filter(a => a.pillar === "CONVERT").length}</span>
                 </li>
               </ul>
             </div>

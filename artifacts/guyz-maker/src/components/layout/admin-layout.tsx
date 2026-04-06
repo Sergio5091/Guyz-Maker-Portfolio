@@ -3,6 +3,7 @@ import { LayoutDashboard, FileText, Briefcase, LogOut, Menu, BarChart2 } from "l
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { useAdminStore } from "@/stores/adminStore";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -11,6 +12,7 @@ interface AdminLayoutProps {
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const [location] = useLocation();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const { logout, admin } = useAdminStore();
 
   const navItems = [
     { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
@@ -50,26 +52,44 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       {/* Desktop Sidebar */}
       <aside className="hidden md:flex flex-col w-64 bg-[#1a1a2e] text-white border-r border-gray-800">
         <div className="p-6">
-          <Link href="/admin" className="flex items-center gap-2 font-orbitron font-bold text-xl tracking-tight text-white">
-            <span className="text-primary">GUYZ</span> MAKER <span className="text-xs text-gray-400 font-sans tracking-normal ml-1">ADMIN</span>
-          </Link>
+          <Link href="/admin" className="flex items-center gap-2">
+          <img 
+            src="/images/logo-white.svg" 
+            alt="Guyz Maker" 
+            className="h-12 w-auto"
+          />
+          <span className="text-primary text-sm font-sans tracking-normal">ADMIN</span>
+        </Link>
+          {admin && (
+            <p className="text-xs text-gray-400 mt-2">{admin.email}</p>
+          )}
         </div>
         <div className="flex-1 px-4 py-2">
           <NavLinks />
         </div>
         <div className="p-4 border-t border-white/10">
-          <Link href="/" className="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium text-gray-400 hover:bg-white/10 hover:text-white transition-colors">
+          <button 
+            onClick={() => {
+              logout();
+              window.location.href = '/admin/login';
+            }}
+            className="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium text-gray-400 hover:bg-white/10 hover:text-white transition-colors w-full text-left"
+          >
             <LogOut className="w-5 h-5" />
-            Exit Admin
-          </Link>
+            Logout
+          </button>
         </div>
       </aside>
 
       {/* Mobile Header & Sidebar */}
       <div className="flex-1 flex flex-col min-w-0">
         <header className="md:hidden flex items-center justify-between p-4 bg-[#1a1a2e] text-white">
-          <Link href="/admin" className="font-orbitron font-bold text-lg">
-            GUYZ MAKER
+          <Link href="/admin" className="flex items-center gap-2">
+            <img 
+              src="/images/logo-white.svg" 
+              alt="Guyz Maker" 
+              className="h-12 w-auto"
+            />
           </Link>
           <Sheet open={isMobileOpen} onOpenChange={setIsMobileOpen}>
             <SheetTrigger asChild>
@@ -79,18 +99,28 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             </SheetTrigger>
             <SheetContent side="left" className="w-64 bg-[#1a1a2e] text-white border-r-gray-800 p-0">
               <div className="p-6">
-                <span className="font-orbitron font-bold text-xl tracking-tight text-white">
-                  <span className="text-primary">GUYZ</span> MAKER
-                </span>
+                <Link href="/admin" className="flex items-center gap-2">
+                  <img 
+                    src="/images/logo-white.svg" 
+                    alt="Guyz Maker" 
+                    className="h-12 w-auto"
+                  />
+                </Link>
               </div>
               <div className="px-4 py-2">
                 <NavLinks />
               </div>
               <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-white/10">
-                <Link href="/" className="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium text-gray-400 hover:bg-white/10 hover:text-white">
+                <button 
+                  onClick={() => {
+                    logout();
+                    window.location.href = '/admin/login';
+                  }}
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium text-gray-400 hover:bg-white/10 hover:text-white w-full text-left"
+                >
                   <LogOut className="w-5 h-5" />
-                  Exit Admin
-                </Link>
+                  Logout
+                </button>
               </div>
             </SheetContent>
           </Sheet>

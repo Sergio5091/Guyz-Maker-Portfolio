@@ -21,9 +21,11 @@ export function Navbar() {
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-md">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <Link href="/" className="flex items-center space-x-2">
-          <span className="font-orbitron text-xl font-black text-foreground tracking-tight">
-            GUYZ<span className="text-primary">MAKER</span>
-          </span>
+          <img 
+            src="/images/logo.svg" 
+            alt="Guyz Maker" 
+            className="h-16 w-auto"
+          />
         </Link>
 
         {/* Desktop Nav */}

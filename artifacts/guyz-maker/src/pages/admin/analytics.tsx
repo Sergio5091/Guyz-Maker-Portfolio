@@ -2,7 +2,10 @@ import { useGetAnalyticsStats, useGetDailyViews, useListPageViews } from "@works
 import AdminLayout from "@/components/layout/admin-layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Eye, TrendingUp, Calendar, BarChart2, Globe } from "lucide-react";
+import { useState } from "react";
 import {
   AreaChart,
   Area,
@@ -59,20 +62,44 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 };
 
 export default function AdminAnalytics() {
-  const { data: stats, isLoading: loadingStats } = useGetAnalyticsStats({ days: 30 });
-  const { data: daily, isLoading: loadingDaily } = useGetDailyViews({ days: 30 });
-  const { data: pages, isLoading: loadingPages } = useListPageViews({ days: 30, limit: 10 });
+  const [days, setDays] = useState(30);
+  const { data: stats, isLoading: loadingStats } = useGetAnalyticsStats({ days });
+  const { data: daily, isLoading: loadingDaily } = useGetDailyViews({ days });
+  const { data: pages, isLoading: loadingPages } = useListPageViews({ days, limit: 10 });
 
-  const chartData = daily?.map(d => ({
-    date: format(new Date(d.date), "d MMM", { locale: fr }),
+  const chartData = Array.isArray(daily) ? daily.map(d => ({
+    date: d.date ? format(new Date(d.date), "d MMM", { locale: fr }) : 'Unknown',
     views: d.views,
-  })) ?? [];
+  })) : [];
 
   return (
     <AdminLayout>
       <div className="mb-8">
-        <h1 className="text-3xl font-orbitron font-bold text-gray-900 tracking-tight">Statistiques</h1>
-        <p className="text-gray-500 mt-1">Visites du site sur les 30 derniers jours.</p>
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-orbitron font-bold text-gray-900 tracking-tight">Statistiques</h1>
+            <p className="text-gray-500 mt-1">Visites du site et analyse des performances.</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <Select value={days.toString()} onValueChange={(value) => setDays(parseInt(value))}>
+              <SelectTrigger className="w-32">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="7">7 jours</SelectItem>
+                <SelectItem value="30">30 jours</SelectItem>
+                <SelectItem value="90">90 jours</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => window.location.reload()}
+            >
+              Actualiser
+            </Button>
+          </div>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
@@ -86,12 +113,14 @@ export default function AdminAnalytics() {
         <StatCard
           title="Vues aujourd'hui"
           value={stats?.todayViews}
+          subtitle={days === 30 ? "aujourd'hui" : `sur ${days} jours`}
           icon={Calendar}
           loading={loadingStats}
         />
         <StatCard
           title="Vues cette semaine"
           value={stats?.weekViews}
+          subtitle="7 derniers jours"
           icon={TrendingUp}
           loading={loadingStats}
         />
@@ -109,7 +138,7 @@ export default function AdminAnalytics() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 font-orbitron text-base">
               <BarChart2 className="w-5 h-5 text-primary" />
-              Visites par jour
+              Visites par jour ({days} jours)
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -156,7 +185,7 @@ export default function AdminAnalytics() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="font-orbitron text-base">Pages les plus vues</CardTitle>
+            <CardTitle className="font-orbitron text-base">Pages les plus vues ({days} jours)</CardTitle>
           </CardHeader>
           <CardContent>
             {loadingPages ? (
@@ -165,12 +194,12 @@ export default function AdminAnalytics() {
                   <Skeleton key={i} className="h-8 w-full" />
                 ))}
               </div>
-            ) : pages?.length === 0 ? (
+            ) : Array.isArray(pages) && pages.length === 0 ? (
               <p className="text-gray-400 text-sm text-center py-8">Aucune donnée encore.</p>
             ) : (
               <div className="space-y-2">
-                {pages?.map((p, i) => {
-                  const max = pages[0]?.views ?? 1;
+                {Array.isArray(pages) && pages.map((p, i) => {
+                  const max = Array.isArray(pages) && pages.length > 0 ? pages[0]?.views ?? 1 : 1;
                   const pct = Math.round((p.views / max) * 100);
                   return (
                     <div key={p.path}>
@@ -198,7 +227,7 @@ export default function AdminAnalytics() {
       <div className="mt-6">
         <Card>
           <CardHeader>
-            <CardTitle className="font-orbitron text-base">Détail par page (30j)</CardTitle>
+            <CardTitle className="font-orbitron text-base">Détail par page ({days} jours)</CardTitle>
           </CardHeader>
           <CardContent>
             {loadingPages ? (
@@ -210,12 +239,12 @@ export default function AdminAnalytics() {
                   <span className="text-right">Vues</span>
                   <span className="text-right">Dernière visite</span>
                 </div>
-                {pages?.map(p => (
+                {Array.isArray(pages) && pages.map(p => (
                   <div key={p.path} className="grid grid-cols-4 text-sm py-2.5 hover:bg-gray-50">
                     <span className="col-span-2 font-medium text-gray-700 truncate" title={p.path}>{p.path}</span>
                     <span className="text-right font-bold text-primary">{p.views}</span>
                     <span className="text-right text-gray-400 text-xs">
-                      {format(new Date(p.lastVisit), "d MMM yyyy", { locale: fr })}
+                      {p.lastVisit ? format(new Date(p.lastVisit), "d MMM yyyy", { locale: fr }) : 'Never'}
                     </span>
                   </div>
                 ))}

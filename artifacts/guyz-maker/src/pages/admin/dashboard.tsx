@@ -12,9 +12,9 @@ export default function AdminDashboard() {
   const { data: articles, isLoading: loadingArticles } = useListArticles();
   const { data: projects, isLoading: loadingProjects } = useListProjects();
 
-  const publishedArticles = articles?.filter(a => a.published) || [];
-  const draftArticles = articles?.filter(a => !a.published) || [];
-  const featuredProjects = projects?.filter(p => p.featured) || [];
+  const publishedArticles = Array.isArray(articles) ? articles.filter(a => a.published) : [];
+  const draftArticles = Array.isArray(articles) ? articles.filter(a => !a.published) : [];
+  const featuredProjects = Array.isArray(projects) ? projects.filter(p => p.featured) : [];
 
   return (
     <AdminLayout>
@@ -47,7 +47,7 @@ export default function AdminDashboard() {
           </CardHeader>
           <CardContent>
             {loadingArticles ? <Skeleton className="h-8 w-16" /> : (
-              <div className="text-3xl font-bold">{articles?.length || 0}</div>
+              <div className="text-3xl font-bold">{Array.isArray(articles) ? articles.length : 0}</div>
             )}
             <p className="text-xs text-gray-500 mt-1">
               {publishedArticles.length} published, {draftArticles.length} drafts
@@ -61,7 +61,7 @@ export default function AdminDashboard() {
           </CardHeader>
           <CardContent>
             {loadingProjects ? <Skeleton className="h-8 w-16" /> : (
-              <div className="text-3xl font-bold">{projects?.length || 0}</div>
+              <div className="text-3xl font-bold">{Array.isArray(projects) ? projects.length : 0}</div>
             )}
             <p className="text-xs text-gray-500 mt-1">
               {featuredProjects.length} featured
@@ -84,10 +84,10 @@ export default function AdminDashboard() {
                 Array.from({ length: 3 }).map((_, i) => (
                   <div key={i} className="p-4"><Skeleton className="h-12 w-full" /></div>
                 ))
-              ) : articles?.length === 0 ? (
+              ) : Array.isArray(articles) && articles.length === 0 ? (
                 <div className="p-8 text-center text-gray-500">No articles found.</div>
               ) : (
-                articles?.slice(0, 5).map(article => (
+                Array.isArray(articles) && articles.slice(0, 5).map(article => (
                   <div key={article.id} className="p-4 flex items-center justify-between hover:bg-gray-50 transition-colors">
                     <div>
                       <Link href={`/admin/articles/${article.id}/edit`} className="font-medium text-gray-900 hover:text-primary block">
@@ -99,7 +99,7 @@ export default function AdminDashboard() {
                           {article.published ? "Published" : "Draft"}
                         </span>
                         <span>•</span>
-                        <span>{format(new Date(article.createdAt), "MMM d, yyyy")}</span>
+                        <span>{article.createdAt ? format(new Date(article.createdAt), "MMM d, yyyy") : "No date"}</span>
                         <span>•</span>
                         <span>{article.pillar}</span>
                       </div>
@@ -127,10 +127,10 @@ export default function AdminDashboard() {
                 Array.from({ length: 3 }).map((_, i) => (
                   <div key={i} className="p-4"><Skeleton className="h-12 w-full" /></div>
                 ))
-              ) : projects?.length === 0 ? (
+              ) : Array.isArray(projects) && projects.length === 0 ? (
                 <div className="p-8 text-center text-gray-500">No projects found.</div>
               ) : (
-                projects?.slice(0, 5).map(project => (
+                Array.isArray(projects) && projects.slice(0, 5).map(project => (
                   <div key={project.id} className="p-4 flex items-center justify-between hover:bg-gray-50 transition-colors">
                     <div>
                       <Link href={`/admin/projects/${project.id}/edit`} className="font-medium text-gray-900 hover:text-primary block">

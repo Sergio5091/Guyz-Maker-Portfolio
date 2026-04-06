@@ -1,121 +1,114 @@
-import { Router, type IRouter } from "express";
-import { eq } from "drizzle-orm";
-import { db, articlesTable } from "@workspace/db";
-import {
-  ListArticlesQueryParams,
-  ListArticlesResponse,
-  CreateArticleBody,
-  GetArticleParams,
-  GetArticleResponse,
-  UpdateArticleParams,
-  UpdateArticleBody,
-  UpdateArticleResponse,
-  DeleteArticleParams,
-} from "@workspace/api-zod";
+import { Router, type IRouter, type Request, type Response } from "express";
+import { requireAuth, type AuthenticatedRequest } from "../middleware/auth.js";
+// @ts-ignore
+import mysql from "mysql2/promise";
 
 const router: IRouter = Router();
 
-router.get("/articles", async (req, res): Promise<void> => {
-  const query = ListArticlesQueryParams.safeParse(req.query);
-  if (!query.success) {
-    res.status(400).json({ error: query.error.message });
-    return;
-  }
+// Configuration MySQL (même que index.ts)
+const dbConfig = {
+  host: 'localhost',
+  user: 'root',
+  password: '1234',
+  database: 'guyz_maker_portfolio',
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
+};
 
-  let dbQuery = db.select().from(articlesTable).$dynamic();
+let pool: mysql.Pool;
 
-  if (query.data.pillar) {
-    dbQuery = dbQuery.where(eq(articlesTable.pillar, query.data.pillar));
+// Initialiser la connexion MySQL
+async function initDB() {
+  try {
+    if (!pool) {
+      pool = mysql.createPool(dbConfig);
+      console.log('✅ Articles: MySQL connected successfully');
+    }
+  } catch (error) {
+    console.error('❌ Articles: MySQL connection failed:', error);
+    process.exit(1);
   }
-  if (query.data.published !== undefined) {
-    const isPublished = query.data.published === "true";
-    dbQuery = dbQuery.where(eq(articlesTable.published, isPublished));
-  }
+}
 
-  const articles = await dbQuery.orderBy(articlesTable.createdAt);
-  res.json(ListArticlesResponse.parse(articles));
+// GET /articles - Lister tous les articles
+router.get("/", async (req: Request, res: Response) => {
+  try {
+    await initDB();
+    const [rows] = await pool.execute('SELECT * FROM articles ORDER BY created_at DESC');
+    res.json(rows);
+  } catch (error) {
+    console.error("Error fetching articles:", error);
+    res.status(500).json({ error: "Failed to fetch articles" });
+  }
 });
 
-router.post("/articles", async (req, res): Promise<void> => {
-  const parsed = CreateArticleBody.safeParse(req.body);
-  if (!parsed.success) {
-    res.status(400).json({ error: parsed.error.message });
-    return;
+// GET /articles/:id - Récupérer un article spécifique
+router.get("/:id", async (req: Request, res: Response) => {
+  try {
+    await initDB();
+    const id = parseInt(req.params.id as string);
+    const [rows] = await pool.execute('SELECT * FROM articles WHERE id = ?', [id]);
+    const article = (rows as any[])[0];
+    
+    if (!article) {
+      res.status(404).json({ error: "Article not found" });
+      return;
+    }
+    
+    res.json(article);
+  } catch (error) {
+    console.error("Error fetching article:", error);
+    res.status(500).json({ error: "Failed to fetch article" });
   }
-
-  const [article] = await db
-    .insert(articlesTable)
-    .values(parsed.data)
-    .returning();
-
-  res.status(201).json(GetArticleResponse.parse(article));
 });
 
-router.get("/articles/:id", async (req, res): Promise<void> => {
-  const params = GetArticleParams.safeParse(req.params);
-  if (!params.success) {
-    res.status(400).json({ error: params.error.message });
-    return;
+// POST /articles - Créer un article
+router.post("/", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    await initDB();
+    const { title, slug, excerpt, content, pillar, coverImage, published, readingTime } = req.body;
+    const [result] = await pool.execute(
+      'INSERT INTO articles (title, slug, excerpt, content, pillar, cover_image, published, reading_time, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())',
+      [title, slug, excerpt, content, pillar, coverImage, published, readingTime]
+    );
+    const newArticle = { id: (result as mysql.ResultSetHeader).insertId, ...req.body };
+    res.status(201).json(newArticle);
+  } catch (error) {
+    console.error("Error creating article:", error);
+    res.status(500).json({ error: "Failed to create article" });
   }
-
-  const [article] = await db
-    .select()
-    .from(articlesTable)
-    .where(eq(articlesTable.id, params.data.id));
-
-  if (!article) {
-    res.status(404).json({ error: "Article not found" });
-    return;
-  }
-
-  res.json(GetArticleResponse.parse(article));
 });
 
-router.patch("/articles/:id", async (req, res): Promise<void> => {
-  const params = UpdateArticleParams.safeParse(req.params);
-  if (!params.success) {
-    res.status(400).json({ error: params.error.message });
-    return;
+// PUT /articles/:id - Mettre à jour un article
+router.put("/:id", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    await initDB();
+    const id = parseInt(req.params.id as string);
+    const { title, slug, excerpt, content, pillar, coverImage, published, readingTime } = req.body;
+    await pool.execute(
+      'UPDATE articles SET title = ?, slug = ?, excerpt = ?, content = ?, pillar = ?, cover_image = ?, published = ?, reading_time = ?, updated_at = NOW() WHERE id = ?',
+      [title, slug, excerpt, content, pillar, coverImage, published, readingTime, id]
+    );
+    const [rows] = await pool.execute('SELECT * FROM articles WHERE id = ?', [id]);
+    res.json((rows as any[])[0]);
+  } catch (error) {
+    console.error("Error updating article:", error);
+    res.status(500).json({ error: "Failed to update article" });
   }
-
-  const parsed = UpdateArticleBody.safeParse(req.body);
-  if (!parsed.success) {
-    res.status(400).json({ error: parsed.error.message });
-    return;
-  }
-
-  const [article] = await db
-    .update(articlesTable)
-    .set({ ...parsed.data, updatedAt: new Date() })
-    .where(eq(articlesTable.id, params.data.id))
-    .returning();
-
-  if (!article) {
-    res.status(404).json({ error: "Article not found" });
-    return;
-  }
-
-  res.json(UpdateArticleResponse.parse(article));
 });
 
-router.delete("/articles/:id", async (req, res): Promise<void> => {
-  const params = DeleteArticleParams.safeParse(req.params);
-  if (!params.success) {
-    res.status(400).json({ error: params.error.message });
-    return;
+// DELETE /articles/:id - Supprimer un article
+router.delete("/:id", requireAuth, async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    await initDB();
+    const id = parseInt(req.params.id as string);
+    await pool.execute('DELETE FROM articles WHERE id = ?', [id]);
+    res.status(204).send();
+  } catch (error) {
+    console.error("Error deleting article:", error);
+    res.status(500).json({ error: "Failed to delete article" });
   }
-
-  const [article] = await db
-    .delete(articlesTable)
-    .where(eq(articlesTable.id, params.data.id))
-    .returning();
-
-  if (!article) {
-    res.status(404).json({ error: "Article not found" });
-    return;
-  }
-
-  res.sendStatus(204);
 });
 
 export default router;
