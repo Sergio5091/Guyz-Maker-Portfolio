@@ -20,7 +20,11 @@ jobs:
           node-version: '22'
           cache: 'pnpm'
       - run: pnpm install
-      - run: pnpm --filter guyz-maker build
+      - name: Build frontend
+        run: pnpm --filter guyz-maker build
+        env:
+          PORT: 3000
+          BASE_PATH: /
       - name: Deploy to VPS
         uses: appleboy/scp-action@v0.1.7
         with:
