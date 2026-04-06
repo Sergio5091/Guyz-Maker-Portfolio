@@ -2,7 +2,7 @@ User-agent: *
 Allow: /
 
 # Sitemap
-Sitemap: https://guyzmaker.com/sitemap.xml
+Sitemap: https://guyzmaker.me/sitemap.xml
 
 # Bloquer les pages d'administration
 Disallow: /admin/
